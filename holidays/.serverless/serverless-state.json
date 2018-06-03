@@ -1,0 +1,252 @@
+{
+  "service": {
+    "service": "holidays",
+    "serviceObject": {
+      "name": "holidays"
+    },
+    "provider": {
+      "stage": "dev",
+      "region": "ap-northeast-1",
+      "variableSyntax": "\\${([ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}",
+      "name": "aws",
+      "runtime": "python3.6",
+      "iamRoleStatements": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+          ],
+          "Resource": "arn:aws:logs:*:*:*"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket"
+          ],
+          "Resource": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:s3:::",
+                "test-bucket-755464741486"
+              ]
+            ]
+          }
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:GetObject"
+          ],
+          "Resource": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:s3:::",
+                "test-bucket-755464741486",
+                "/*"
+              ]
+            ]
+          }
+        }
+      ],
+      "versionFunctions": true,
+      "remoteFunctionData": null,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket"
+          },
+          "RunnerLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/holidays-prd-runner"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "prd",
+                        "holidays",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/holidays-prd-runner:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/holidays-prd-runner:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][0]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][1]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][2]"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "holidays",
+                    "prd",
+                    "ap-northeast-1",
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "RunnerLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/holidays/prd/1528011676978-2018-06-03T07:41:16.978Z/holidays.zip"
+              },
+              "FunctionName": "holidays-prd-runner",
+              "Handler": "handler.runner",
+              "MemorySize": 128,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Runtime": "python3.6",
+              "Timeout": 60,
+              "Environment": {
+                "Variables": {
+                  "S3_TARGET_BUCKET": "test-bucket-755464741486",
+                  "S3_OBJECT_KEY": "holidays.json"
+                }
+              }
+            },
+            "DependsOn": [
+              "RunnerLogGroup",
+              "IamRoleLambdaExecution"
+            ]
+          },
+          "RunnerLambdaVersionNty6NEPp82zd8RX72rXK8lQAP93VEPufDc4shKGLQ": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "RunnerLambdaFunction"
+              },
+              "CodeSha256": "zM7WB3CV7Kgjkj2yoNuw5S0gr6+gGqCvuom6lFRjVwM="
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": {
+              "Ref": "ServerlessDeploymentBucket"
+            }
+          },
+          "RunnerLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "RunnerLambdaVersionNty6NEPp82zd8RX72rXK8lQAP93VEPufDc4shKGLQ"
+            }
+          }
+        }
+      },
+      "coreCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket"
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": {
+              "Ref": "ServerlessDeploymentBucket"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "custom": {
+      "stage": "prd"
+    },
+    "functions": {
+      "runner": {
+        "handler": "handler.runner",
+        "memorySize": 128,
+        "timeout": 60,
+        "environment": {
+          "S3_TARGET_BUCKET": "test-bucket-755464741486",
+          "S3_OBJECT_KEY": "holidays.json"
+        },
+        "events": [],
+        "name": "holidays-prd-runner",
+        "package": {},
+        "vpc": {}
+      }
+    },
+    "artifact": "/Users/ma-yazawa/.ghq/github.com/Hikosaburou/intro_serverless/holidays/.serverless/holidays.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/holidays/prd/1528011676978-2018-06-03T07:41:16.978Z",
+    "artifact": "holidays.zip"
+  }
+}
