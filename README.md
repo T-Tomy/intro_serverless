@@ -119,7 +119,7 @@ git add <path to file>
 `git add` したコードをバックアップ可能な点として登録する (コミットする) ために、 `git commit` を次の書式で実行する。
 
 ```
-git commit -m `commit message`
+git commit -m 'commit message'
 ```
 
 `commit message` には通常、変更点を簡潔に記載する (xxを修正、ooを追加、など) 。
