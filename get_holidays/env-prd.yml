@@ -1,3 +1,3 @@
-S3_TARGET_BUCKET: 'test-bucket-755464741486'
+S3_TARGET_BUCKET: 'sl5-145-734315545835'
 S3_OBJECT_KEY: 'holidays.json'
 HOLIDAYS_CSV_URL: 'http://www8.cao.go.jp/chosei/shukujitsu/syukujitsu_kyujitsu.csv'
